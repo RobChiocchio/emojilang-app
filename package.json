@@ -14,6 +14,7 @@
     "@expo/samples": "2.1.1",
     "emojilang": "https://github.com/RobethX/emojilang.git",
     "expo": "^32.0.0",
+    "monaco-editor": "^0.15.6",
     "native-base": "2.8.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
