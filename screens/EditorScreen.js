@@ -1,27 +1,157 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { ExpoLinksView } from '@expo/samples';
+import {
+    render
+}
+from 'react-dom';
+// eslint-disable-next-line import/no-unresolved, import/extensions
+import MonacoEditor from 'react-monaco-editor';
+/* eslint-enable import/no-extraneous-dependencies */
 
-export default class LinksScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Editor',
-  };
+// Using with webpack
+class EditorScreen extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            code: '// type your code... \n',
+        }
+    }
 
-  render() {
-    return (
-      <ScrollView style={styles.container}>
-        {/* Go ahead and delete ExpoLinksView and replace it with your
-           * content, we just wanted to provide you with some helpful links */}
-        <ExpoLinksView />
-      </ScrollView>
-    );
-  }
+    static navigationOptions = {
+        title: 'Editor',
+    };
+
+    onChange = (newValue, e) => {
+        console.log('onChange', newValue, e); // eslint-disable-line no-console
+    }
+
+    editorDidMount = (editor) => {
+        // eslint-disable-next-line no-console
+        console.log('editorDidMount', editor, editor.getValue(), editor.getModel());
+        this.editor = editor;
+    }
+
+    changeEditorValue = () => {
+        if (this.editor) {
+            this.editor.setValue('// code changed! \n');
+        }
+    }
+
+    changeBySetState = () => {
+        this.setState({
+            code: '// code changed by setState! \n'
+        });
+    }
+
+    render() {
+        const {
+            code
+        } = this.state;
+        const options = {
+            selectOnLineNumbers: true,
+            roundedSelection: false,
+            readOnly: false,
+            cursorStyle: 'line',
+            automaticLayout: false,
+        };
+        return ( < div >
+            < div >
+            < button onClick = {
+                this.changeEditorValue
+            }
+            type = "button" > Change value </button> < button onClick = {
+                this.changeBySetState
+            }
+            type = "button" > Change by setState </button> </div> <hr/>
+            < MonacoEditor height = "500"
+            language = "javascript"
+            value = {
+                code
+            }
+            options = {
+                options
+            }
+            onChange = {
+                this.onChange
+            }
+            editorDidMount = {
+                this.editorDidMount
+            }
+            /> </div>
+        );
+    }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 15,
-    backgroundColor: '#fff',
-  },
-});
+class AnotherEditor extends React.Component { // eslint-disable-line react/no-multi-comp
+    constructor(props) {
+        super(props);
+        const jsonCode = [
+            '{',
+            '    "$schema": "http://myserver/foo-schema.json"',
+            '}'
+        ].join('\n');
+        this.state = {
+            code: jsonCode,
+        }
+    }
+
+    editorWillMount = (monaco) => {
+        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+            validate: true,
+            schemas: [{
+                uri: 'http://myserver/foo-schema.json',
+                schema: {
+                    type: 'object',
+                    properties: {
+                        p1: {
+                            enum: ['v1', 'v2']
+                        },
+                        p2: {
+                            $ref: 'http://myserver/bar-schema.json'
+                        }
+                    }
+                }
+            }, {
+                uri: 'http://myserver/bar-schema.json',
+                schema: {
+                    type: 'object',
+                    properties: {
+                        q1: {
+                            enum: ['x1', 'x2']
+                        }
+                    }
+                }
+            }]
+        });
+    }
+
+    render() {
+        const {
+            code
+        } = this.state;
+        return ( <div>
+            < MonacoEditor width = "800"
+            height = "600"
+            language = "json"
+            defaultValue = {
+                code
+            }
+            editorWillMount = {
+                this.editorWillMount
+            }
+            /> </div>
+        );
+    }
+}
+
+// eslint-disable-next-line react/no-multi-comp
+const App = () => ( <div>
+    <h2> Monaco Editor Sample(controlled mode) </h2> <CodeEditor/>
+    <hr/>
+    <h2> Another editor(uncontrolled mode) </h2> <AnotherEditor/>
+    </div>
+)
+
+render( <App/> ,
+    document.getElementById('root')
+);
